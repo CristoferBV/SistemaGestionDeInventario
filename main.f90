@@ -1,5 +1,4 @@
 program SistemaInventario
-
     use, intrinsic :: ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
     implicit none
 
@@ -20,7 +19,7 @@ program SistemaInventario
             case (3)
                 call ConsultarPorNombre(nombre)
             case (4)
-                call ConsultarPorPrecio()
+                call ConsultarPorPrecio(precio)
             case (5)
                 EXIT
             case default
@@ -44,15 +43,17 @@ contains
     end subroutine MostrarMenu
 
     subroutine RegistrarProducto(nombre, cantidad, precio)
-        character(50), intent(in) :: nombre
-        integer, intent(in) :: cantidad
-        real, intent(in) :: precio
+        character(50), intent(inout) :: nombre
+        integer, intent(inout) :: cantidad
+        real, intent(inout) :: precio
         ! Implementar la lógica para registrar un producto en el inventario
+        open(unit=11, file="inventario.txt", status="old", action="read")
+        print *, 'Se abrio el archivo'
     end subroutine RegistrarProducto
 
     subroutine VenderProducto(nombre, cantidad_vendida)
         character(50), intent(in) :: nombre
-        integer, intent(in) :: cantidad_vendida
+        integer, intent(inout) :: cantidad_vendida
         ! Implementar la lógica para vender un producto
     end subroutine VenderProducto
 
@@ -61,7 +62,8 @@ contains
         ! Implementar la lógica para consultar por nombre
     end subroutine ConsultarPorNombre
 
-    subroutine ConsultarPorPrecio()
+    subroutine ConsultarPorPrecio(precio)
+        real, intent(in) :: precio
         ! Implementar la lógica para consultar por precio
     end subroutine ConsultarPorPrecio
 
