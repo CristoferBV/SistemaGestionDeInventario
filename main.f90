@@ -3,7 +3,7 @@ program SistemaInventario
     implicit none
 
     integer :: opcion
-    character(50) :: nombre
+    character(25) :: nombre
     integer :: cantidad, cantidad_vendida
     real :: precio
 
@@ -13,7 +13,7 @@ program SistemaInventario
 
         select case(opcion)
             case (1)
-                call RegistrarProducto(nombre, cantidad, precio)
+                call RegistrarProductos()
             case (2)
                 call VenderProducto(nombre, cantidad_vendida)
             case (3)
@@ -42,38 +42,82 @@ contains
         print *, "Seleccione una opcion: "
     end subroutine MostrarMenu
 
-    subroutine RegistrarProducto(nombre, cantidad, precio)
-        character(50), intent(inout) :: nombre
-        integer, intent(inout) :: cantidad
-        real, intent(inout) :: precio
-        ! Implementar la lógica para registrar un producto en el inventario
-        open(unit=11, file="inventario.txt", status="old", action="read")
-        print *, 'Se abrio el archivo'
-    end subroutine RegistrarProducto
+    subroutine RegistrarProductos()
+    character(25) :: nombre
+    integer :: cantidad, numProductos
+    real :: precio
+    integer :: i
+    integer :: ios
+
+    print *, ""
+    print *, "Cuantos productos desea agregar?"
+    read(*, *) numProductos
+
+    ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
+    open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old", action="readwrite", iostat=ios)
+
+    if (ios == 0) then
+        ! Si el archivo existe, mover el puntero al final
+        do i = 1, numProductos
+            read(20, *, iostat=ios)
+            if (ios /= 0) then
+                exit
+            end if
+        end do
+    else
+        ! Si el archivo no existe, cambiar a modo de escritura desconocido para crearlo
+        close(20)
+        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="unknown", action="write", iostat=ios)
+    end if
+
+    do i = 1, numProductos
+        print *, ""
+        print *, "---Registre el producto---  ", i
+        print *, ""
+
+        print *, "Nombre: "
+        read(*, *) nombre
+        print *, ""
+
+        print *, "Cantidad: "
+        read(*, *) cantidad
+        print *, ""
+
+        print *, "Precio: "
+        read(*, *) precio
+        print *, ""
+
+        ! Usar un formato fijo para escribir en el archivo
+        write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
+    end do
+
+    close(20)
+end subroutine RegistrarProductos
+
 
     subroutine VenderProducto(nombre, cantidad_vendida)
-        character(50), intent(in) :: nombre
-        integer, intent(inout) :: cantidad_vendida
+        character(25) :: nombre
+        integer :: cantidad_vendida
         ! Implementar la lógica para vender un producto
     end subroutine VenderProducto
 
     subroutine ConsultarPorNombre(nombre)
-        character(50), intent(in) :: nombre
+        character(25) :: nombre
         ! Implementar la lógica para consultar por nombre
     end subroutine ConsultarPorNombre
 
     subroutine ConsultarPorPrecio(precio)
-        real, intent(in) :: precio
+        real :: precio
         ! Implementar la lógica para consultar por precio
     end subroutine ConsultarPorPrecio
 
     subroutine ManejarError(codigo)
-        integer, intent(in) :: codigo
-        SELECT CASE(codigo)
-            CASE (1)
-                PRINT *, "Opcion invalida. Por favor, seleccione una opción valida."
+        integer :: codigo
+        select case(codigo)
+            case (1)
+                print *, "Opcion invalida. Por favor, seleccione una opción valida."
             ! Agregar más casos para manejar otros errores
-        END SELECT
+        end select
     end subroutine ManejarError
 
 end program SistemaInventario
