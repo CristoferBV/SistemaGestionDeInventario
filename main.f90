@@ -43,57 +43,56 @@ contains
     end subroutine MostrarMenu
 
     subroutine RegistrarProductos()
-    character(25) :: nombre
-    integer :: cantidad, numProductos
-    real :: precio
-    integer :: i
-    integer :: ios
+        character(25) :: nombre
+        integer :: cantidad, numProductos
+        real :: precio
+        integer :: i
+        integer :: ios
 
-    print *, ""
-    print *, "Cuantos productos desea agregar?"
-    read(*, *) numProductos
+        print *, ""
+        print *, "Cuantos productos desea agregar?"
+        read(*, *) numProductos
 
-    ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
-    open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old", action="readwrite", iostat=ios)
+        ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
+        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old", action="readwrite", iostat=ios)
 
-    if (ios == 0) then
-        ! Si el archivo existe, mover el puntero al final
+        if (ios == 0) then
+            ! Si el archivo existe, mover el puntero al final
+            do i = 1, numProductos
+                read(20, *, iostat=ios)
+                if (ios /= 0) then
+                    exit
+                end if
+            end do
+        else
+            ! Si el archivo no existe, cambiar a modo de escritura desconocido para crearlo
+            close(20)
+            open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="unknown", action="write", iostat=ios)
+        end if
+
         do i = 1, numProductos
-            read(20, *, iostat=ios)
-            if (ios /= 0) then
-                exit
-            end if
+            print *, ""
+            print *, "---Registre el producto---  ", i
+            print *, ""
+
+            print *, "Nombre: "
+            read(*, *) nombre
+            print *, ""
+
+            print *, "Cantidad: "
+            read(*, *) cantidad
+            print *, ""
+
+            print *, "Precio: "
+            read(*, *) precio
+            print *, ""
+
+            ! Usar un formato fijo para escribir en el archivo
+            write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
         end do
-    else
-        ! Si el archivo no existe, cambiar a modo de escritura desconocido para crearlo
+
         close(20)
-        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="unknown", action="write", iostat=ios)
-    end if
-
-    do i = 1, numProductos
-        print *, ""
-        print *, "---Registre el producto---  ", i
-        print *, ""
-
-        print *, "Nombre: "
-        read(*, *) nombre
-        print *, ""
-
-        print *, "Cantidad: "
-        read(*, *) cantidad
-        print *, ""
-
-        print *, "Precio: "
-        read(*, *) precio
-        print *, ""
-
-        ! Usar un formato fijo para escribir en el archivo
-        write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
-    end do
-
-    close(20)
-end subroutine RegistrarProductos
-
+    end subroutine RegistrarProductos
 
     subroutine VenderProducto(nombre, cantidad_vendida)
         character(25) :: nombre
