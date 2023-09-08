@@ -49,6 +49,7 @@ contains
         integer :: i
         integer :: ios
 
+        call System("CLS")
         print *, ""
         print *, "Cuantos productos desea agregar?"
         read(*, *) numProductos
@@ -58,19 +59,19 @@ contains
 
         if (ios == 0) then
             ! Si el archivo existe, mover el puntero al final
-            do i = 1, numProductos
+            do i = 0, numProductos
                 read(20, *, iostat=ios)
                 if (ios /= 0) then
                     exit
                 end if
             end do
         else
-            ! Si el archivo no existe, cambiar a modo de escritura desconocido para crearlo
+
             close(20)
             open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="unknown", action="write", iostat=ios)
         end if
 
-        do i = 1, numProductos
+        do i = 0, numProductos
             print *, ""
             print *, "---Registre el producto---  ", i
             print *, ""
@@ -87,11 +88,12 @@ contains
             read(*, *) precio
             print *, ""
 
-            ! Usar un formato fijo para escribir en el archivo
-            write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
+            write(20,'(A15, I5, F10.2)') trim(nombre), cantidad, precio
+            write(unit=iounit, fmt="(format string)", iostat=ios, advance='NO') variables  
         end do
 
         close(20)
+        call System("CLS")
     end subroutine RegistrarProductos
 
     subroutine VenderProducto(nombre, cantidad_vendida)
