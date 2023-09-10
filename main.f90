@@ -1,6 +1,6 @@
 program SistemaInventario
     use, intrinsic :: ISO_FORTRAN_ENV, ONLY: ERROR_UNIT !ERROR_UNIT = Esto se utiliza para definir la unidad de error estándar en Fortran.
-    implicit none                                       !módulo ISO_FORTRAN_ENV
+    implicit none                                       !módulo ISO_FORTRAN_ENV !Ambiente
 
     integer :: opcion
     character(25) :: nombre
@@ -31,6 +31,7 @@ program SistemaInventario
 
 contains
 
+
     subroutine MostrarMenu()
         print *, ""
         print *, "Bienvenido al Sistema de Gestion de Inventarios"
@@ -44,6 +45,7 @@ contains
         print *, ""
         print *, "Seleccione una opcion: "
     end subroutine MostrarMenu
+
 
     subroutine RegistrarProductos()
         character(25) :: nombre
@@ -92,6 +94,7 @@ contains
         call System("CLS")
     end subroutine RegistrarProductos
 
+
     subroutine VenderProducto()
         implicit none
         character(50) :: producto_eliminar
@@ -124,17 +127,18 @@ contains
             num_productos = num_productos + 1
         end do
 
-        10  continue
+        10 continue
 
-        ! Pedir al usuario que elija un producto para eliminar
         print *, ""
         print *, "Ingrese el nombre del producto que desea vender:"
         read *, producto_eliminar
+        print *, ""
 
         ! Buscar el producto en el inventario
         rewind(20)
         do i = 1, num_productos
             read(20, *) nombre_producto, cantidad_producto, precio_producto
+
             if (trim(nombre_producto) == trim(producto_eliminar)) then
                 encontrado = .true.
                 exit
@@ -149,15 +153,20 @@ contains
             open(20, file=file_path, status='replace')
             rewind(20)
             do i = 1, num_productos
-                read(20, *) nombre_producto, cantidad_producto, precio_producto
+                read(20, '(A15, I5, F10.2)', end=20) nombre_producto, cantidad_producto, precio_producto
                 if (trim(nombre_producto) /= trim(producto_eliminar)) then
                     write(20, *) nombre_producto, cantidad_producto, precio_producto
                 end if
             end do
+            20 continue
             close(20)
-            print *, "Producto vendido con éxito."
+            print *, "Producto vendido con exito."
+            call system("PAUSE")
+            call system("CLS")
         else
             print *, "Producto no encontrado en el inventario."
+            call system("PAUSE")
+            call system("CLS")
         end if
 
     end subroutine VenderProducto
@@ -168,46 +177,62 @@ contains
         ! Implementar la lógica para consultar por nombre
     end subroutine ConsultarPorNombre
 
+
     subroutine ConsultarPorPrecio()
         real :: precio
         ! Implementar la lógica para consultar por precio
     end subroutine ConsultarPorPrecio
 
+
     subroutine MostrarInventario()
-        character(25) :: nombre_producto
-        integer :: cantidad_inventario, iostat
+        character(25) :: nombre_producto, opc
+        integer :: cantidad_inventario, num_productos, iostat
         real :: precio_producto
         character(100) :: file_path
+        logical :: archivo_abierto
         file_path = "../SistemaGestionDeInventario/Inventario/inventario.txt"
 
-        ! Abrir el archivo de inventario en modo lectura
-        open(20, file=file_path, status="old")
-
-        ! Verificar si hubo errores al abrir el archivo
-        if (iostat /= 0) then
-            write(*,*) "Error al abrir el archivo de inventario."
-            stop
-        end if
-
-        call System("CLS")
-        ! Mostrar encabezado de la lista de inventario
-        print *, "    Inventario de Productos:"
-        print *, "---------------------------------"
-        print *, "Nombre     Cantidad    Precio"
-        print *, "---------------------------------"
-
-        ! Leer y mostrar los productos del inventario
         do
-            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
-            if (iostat /= 0) exit ! Fin del archivo
-            print *, trim(nombre_producto), cantidad_inventario, precio_producto
-        end do
+            archivo_abierto = .false.
+            if (.not. archivo_abierto) then
+                open(20, file=file_path, status="old", iostat=iostat)
 
-        ! Cerrar el archivo
-        close(20)
-        call system("PAUSE")
-        call system("CLS")
+                ! Verificar si hubo errores al abrir el archivo
+                if (iostat /= 0) then
+                    write(*,*) "Error al abrir el archivo de inventario."
+                    stop
+                end if
+                archivo_abierto = .true.
+            end if
+
+            call System("CLS")
+            print *, "Inventario:"
+            print *, "-----------------------------------------------------------"
+            print *, "Nombre                   |       Cantidad   |     Precio"
+            print *, "-----------------------------------------------------------"
+
+            do
+                read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+                if (iostat /= 0) exit
+                print *, nombre_producto, "|", cantidad_inventario, "     |", precio_producto
+            end do
+
+            print *, ""
+            print *, "Desea salir del inventario s/n"
+            read *, opc
+
+            if (opc /= 's' ) then
+                archivo_abierto = .true.
+                close(20)
+            else
+                archivo_abierto = .true.
+                close(20)
+                call system("CLS")
+                exit
+            end if
+        end do
     end subroutine MostrarInventario
+
 
     subroutine ManejarError(codigo)
         integer :: codigo
