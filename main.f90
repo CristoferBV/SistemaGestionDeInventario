@@ -47,7 +47,6 @@ contains
         integer :: cantidad, numProductos
         real :: precio
         integer :: i
-        integer :: ios
 
         call System("CLS")
         print *, ""
@@ -55,23 +54,9 @@ contains
         read(*, *) numProductos
 
         ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
-        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old", action="readwrite", iostat=ios)
+        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old")
 
-        if (ios == 0) then
-            ! Si el archivo existe, mover el puntero al final
-            do i = 0, numProductos
-                read(20, *, iostat=ios)
-                if (ios /= 0) then
-                    exit
-                end if
-            end do
-        else
-
-            close(20)
-            open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="unknown", action="write", iostat=ios)
-        end if
-
-        do i = 0, numProductos
+        do i = 1, numProductos
             print *, ""
             print *, "---Registre el producto---  ", i
             print *, ""
@@ -93,6 +78,7 @@ contains
 
         close(20)
         call System("CLS")
+
     end subroutine RegistrarProductos
 
     subroutine VenderProducto(nombre, cantidad_vendida)
