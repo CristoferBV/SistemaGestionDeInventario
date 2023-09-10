@@ -423,8 +423,6 @@ contains
             ! Reemplazar el archivo original con el archivo temporal
             call System("copy /Y " // trim(temp_file_path) // " " // trim(file_path))
 
-
-
             ! Mostrar mensaje si el producto no se encontró
             if (.not. encontrado) then
                 print *, "Producto no encontrado en el inventario."
