@@ -47,6 +47,9 @@ contains
         integer :: cantidad, numProductos
         real :: precio
         integer :: i
+        integer :: iostat
+        character(100) :: file_path
+        file_path = "../SistemaGestionDeInventario/Inventario/inventario.txt"
 
         call System("CLS")
         print *, ""
@@ -54,7 +57,13 @@ contains
         read(*, *) numProductos
 
         ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
-        open(20, file="../SistemaGestionDeInventario/Inventario/inventario.txt", status="old")
+        open(20, file=file_path, status="old", action="readwrite", position="append", iostat=iostat)
+
+        ! Verificar si hubo errores al abrir el archivo
+        if (iostat /= 0) then
+            write(*,*) "Error al abrir el archivo."
+            stop
+        end if
 
         do i = 1, numProductos
             print *, ""
@@ -73,12 +82,11 @@ contains
             read(*, *) precio
             print *, ""
 
-            write(20,'(A15, I5, F10.2)') trim(nombre), cantidad, precio
+            write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
         end do
 
         close(20)
         call System("CLS")
-
     end subroutine RegistrarProductos
 
     subroutine VenderProducto(nombre, cantidad_vendida)

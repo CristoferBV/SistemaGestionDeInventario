@@ -1,2 +1,7 @@
           Carne   34   2800.00
-          Arroz   34    999.00
+         Fideos   35    777.00
+          Arroz   43    999.00
+         Fideos   78   7890.00
+          Carne   35   3800.00
+       Frijoles   56    890.00
+        Pescado   90   4000.00
