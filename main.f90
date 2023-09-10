@@ -17,9 +17,9 @@ program SistemaInventario
             case (2)
                 call VenderProducto()
             case (3)
-                call ConsultarPorNombre(nombre)
+                call ConsultarPorNombre()
             case (4)
-                call ConsultarPorPrecio(precio)
+                call ConsultarPorPrecio()
             case (5)
                 call MostrarInventario()
             case (6)
@@ -163,12 +163,12 @@ contains
     end subroutine VenderProducto
 
 
-    subroutine ConsultarPorNombre(nombre)
+    subroutine ConsultarPorNombre()
         character(25) :: nombre
         ! Implementar la lógica para consultar por nombre
     end subroutine ConsultarPorNombre
 
-    subroutine ConsultarPorPrecio(precio)
+    subroutine ConsultarPorPrecio()
         real :: precio
         ! Implementar la lógica para consultar por precio
     end subroutine ConsultarPorPrecio
