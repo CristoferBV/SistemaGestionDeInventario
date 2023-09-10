@@ -96,79 +96,89 @@ contains
 
 
     subroutine VenderProducto()
-        implicit none
-        character(50) :: producto_eliminar
-        integer :: num_productos, i
-        logical :: encontrado
-        character(50) :: nombre_producto
-        real :: precio_producto
-        integer :: cantidad_producto
-        character(100) :: file_path
-        file_path = "../SistemaGestionDeInventario/Inventario/inventario.txt"
+    implicit none
+    character(50) :: nombre_producto
+    character(500) :: file_path, temp_file_path
+    integer :: num_productos, i, iostat, cantidad_producto
+    logical :: encontrado
+    real :: precio_producto
+    character(100) :: dato_a_buscar
 
-        ! Abrir el archivo de inventario
-        open(20, file=file_path, status='old')
+    ! Definir la ruta de archivo principal
+    character(500) :: base_path
+    base_path = "C:\\Users\\Cristofer\\OneDrive - Universidad Nacional de Costa Rica\\Escritorio\\" // &
+                "Sistema de Gestion de Inventarios\\SistemaGestionDeInventario\\Inventario\\"
 
-        ! Inicializar la bandera encontrado
-        encontrado = .false.
+    ! Combinar la ruta base con los nombres de archivos
+    file_path = trim(base_path) // "inventario.txt"
 
-        call system("CLS")
-        ! Mostrar el encabezado del inventario
-        print *, "Inventario:"
-        print *, "-----------------------------------------------------------------------------------"
-        print *, "Nombre                                            |       Cantidad   |    Precio"
-        print *, "-----------------------------------------------------------------------------------"
+    ! Archivo temporal para escritura
+    temp_file_path = trim(base_path) // "temp_inventario.txt"
 
-        ! Leer los productos del archivo
-        num_productos = 0
-        do
-            read(20, *, end=10) nombre_producto, cantidad_producto, precio_producto
-            print *, nombre_producto, "|", cantidad_producto, "     |", precio_producto
-            num_productos = num_productos + 1
-        end do
+    ! Dato a buscar en el archivo y eliminar
+    dato_a_buscar = "Pescado"
 
-        10 continue
+    ! Abrir el archivo de inventario en modo lectura
+    open(20, file=file_path, status='old')
 
-        print *, ""
-        print *, "Ingrese el nombre del producto que desea vender:"
-        read *, producto_eliminar
-        print *, ""
+    ! Abrir el archivo temporal en modo escritura
+    open(30, file=temp_file_path, status='replace')
 
-        ! Buscar el producto en el inventario
-        rewind(20)
-        do i = 1, num_productos
-            read(20, *) nombre_producto, cantidad_producto, precio_producto
+    call system("CLS")
+    print *, "Inventario:"
+    print *, "-----------------------------------------------------------------------------------"
+    print *, "Nombre                                            |       Cantidad   |    Precio"
+    print *, "-----------------------------------------------------------------------------------"
 
-            if (trim(nombre_producto) == trim(producto_eliminar)) then
-                encontrado = .true.
-                exit
-            end if
-        end do
+    ! Inicializar la bandera "encontrado"
+    encontrado = .false.
 
-        close(20)
+    ! Leer los productos del archivo y eliminar si se encuentra el dato
+    num_productos = 0
+    do
+        read(20, *, iostat=iostat) nombre_producto, cantidad_producto, precio_producto
+        if (iostat /= 0) exit ! Fin del archivo
 
-        ! Si se encontró el producto, eliminarlo y actualizar el archivo
-        if (encontrado) then
-            open(20, file=file_path, status='replace')
-            rewind(20)
-            do i = 1, num_productos
-                read(20, '(A15, I5, F10.2)', end=20) nombre_producto, cantidad_producto, precio_producto
-                if (trim(nombre_producto) /= trim(producto_eliminar)) then
-                    write(20, *) nombre_producto, cantidad_producto, precio_producto
-                end if
-            end do
-            20 continue
-            close(20)
-            print *, "Producto vendido con exito."
-            call system("PAUSE")
-            call system("CLS")
+        ! Si se encuentra un producto con el dato buscado, marcar como encontrado
+        if (trim(nombre_producto) == trim(dato_a_buscar)) then
+            encontrado = .true.
         else
-            print *, "Producto no encontrado en el inventario."
-            call system("PAUSE")
-            call system("CLS")
+            ! Escribir la línea en el archivo temporal si no se debe eliminar
+            write(30, '(A, I6, F8.2)') nombre_producto, cantidad_producto, precio_producto
+            num_productos = num_productos + 1
         end if
+    end do
 
-    end subroutine VenderProducto
+    ! Cerrar los archivos
+    close(20)
+    close(30)
+
+    ! Reemplazar el archivo original con el archivo temporal si se eliminó una línea
+    if (encontrado) then
+        call system("rename " // trim(temp_file_path) // " " // "inventario.txt")
+    else
+        ! Eliminar el archivo temporal si no se eliminó ninguna línea
+        call system("erase " // trim(temp_file_path))
+    end if
+
+    ! Volver a abrir el archivo temporal para mostrar su contenido
+    open(30, file=temp_file_path, status='old')
+
+    ! Mostrar el contenido del archivo temporal en la consola
+    do
+        read(30, *, iostat=iostat) nombre_producto, cantidad_producto, precio_producto
+        if (iostat /= 0) exit ! Fin del archivo
+        print *, nombre_producto, "|", cantidad_producto, "     |", precio_producto
+    end do
+
+    ! Cerrar el archivo temporal
+    close(30)
+
+    call system("PAUSE")
+    call system("CLS")
+
+end subroutine VenderProducto
+
 
 
     subroutine ConsultarPorNombre()
@@ -340,5 +350,7 @@ contains
                 call system("CLS")
         end select
     end subroutine ManejarError
+
+    
 
 end program SistemaInventario
