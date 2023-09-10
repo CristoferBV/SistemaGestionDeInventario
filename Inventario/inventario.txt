@@ -5,4 +5,6 @@
         Pescado   44   3400.00
        Frijoles   98    890.00
             Pan   89   1050.00
-          Leche   45    890.00
+          Leche   32    870.00
+         Fresco   78    250.00
+    Macarronnes   78   1000.00
