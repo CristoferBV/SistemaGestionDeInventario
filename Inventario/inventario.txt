@@ -1,0 +1,7 @@
+          Carne   34   2800.00
+         Fideos   35    777.00
+          Arroz   43    999.00
+          Papas   89    550.00
+        Pescado   44   3400.00
+       Frijoles   98    890.00
+            Pan   89   1050.00
