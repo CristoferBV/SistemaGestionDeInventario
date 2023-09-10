@@ -23,6 +23,8 @@ program SistemaInventario
             case (5)
                 call MostrarInventario()
             case (6)
+                call ActualizarInventario()
+            case (7)
                 exit
             case default
                 call ManejarError(1)
@@ -41,7 +43,8 @@ contains
         print *, "3. Consultar por nombre"
         print *, "4. Consultar por precio"
         print *, "5. Mostrar inventario"
-        print *, "6. Salir"
+        print *, "6. Actualizar Inventario"
+        print *, "7. Salir"
         print *, ""
         print *, "Seleccione una opcion: "
     end subroutine MostrarMenu
@@ -330,6 +333,109 @@ contains
             end if
         end do
     end subroutine MostrarInventario
+
+    subroutine ActualizarInventario()
+        character(25) :: nombre
+        character(25) :: nombre_producto
+        integer :: cantidad_inventario, iostat
+        real :: precio_producto
+        logical :: encontrado
+        character(500) :: file_path
+        character(500) :: temp_file_path
+        integer :: iunit
+        integer :: opcion
+
+       character(500) :: base_path
+        base_path = "C:\\Users\\Cristofer\\OneDrive - Universidad Nacional de Costa Rica\\Escritorio\\" // &
+                    "Sistema de Gestion de Inventarios\\SistemaGestionDeInventario\\Inventario\\"
+
+        ! Combinar la ruta base con el nombre del archivo principal
+        file_path = trim(base_path) // "inventario.txt"
+        temp_file_path = trim(base_path) // "temp_inventario.txt"
+
+        ! Abrir el archivo de inventario en modo lectura
+        open(20, file=file_path, status="old")
+
+        call System("CLS")
+        ! Mostrar encabezado de la lista de inventario
+        print *, "    Inventario de Productos:"
+        print *, "---------------------------------"
+        print *, "Nombre     Cantidad    Precio"
+        print *, "---------------------------------"
+
+        ! Leer y mostrar los productos del inventario
+        do
+            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+            if (iostat /= 0) exit ! Fin del archivo
+            print *, trim(nombre_producto), cantidad_inventario, precio_producto
+        end do
+
+        ! Cerrar el archivo
+        close(20)
+
+        print *, ""
+        print *, "Seleccione una opcion:"
+        print *, "1. Editar producto"
+        print *, "2. Volver al menu principal"
+        read(*, *) opcion
+
+        if (opcion == 1) then
+            call System("CLS")
+            ! Pedir al usuario el nombre del producto a editar
+            print *, "Ingrese el nombre del producto que desea editar:"
+            read(*, *) nombre
+            print *, ""
+
+            ! Inicializar la bandera "encontrado"
+            encontrado = .false.
+
+            ! Abrir el archivo de inventario en modo lectura y escritura
+            open(20, file=file_path, status="old", action="readwrite")
+
+            ! Abrir un archivo temporal para escribir los datos editados
+            open(iunit, file=temp_file_path, status="replace")
+
+            ! Leer y editar los productos del inventario
+            do
+            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+            if (iostat /= 0) exit ! Fin del archivo
+
+            ! Si se encuentra un producto con el nombre buscado, editar y escribir en el archivo temporal
+            if (trim(nombre_producto) == trim(nombre)) then
+                print *, "Editando producto:", nombre_producto
+                print *, "Ingrese el nuevo nombre:"
+                read(*, *) nombre_producto
+                print *, "Ingrese la nueva cantidad:"
+                read(*, *) cantidad_inventario
+                print *, "Ingrese el nuevo precio:"
+                read(*, *) precio_producto
+                encontrado = .true.
+            end if
+
+            ! Escribir en el archivo temporal
+            write(iunit, *) trim(nombre_producto), cantidad_inventario, precio_producto
+            end do
+
+            ! Cerrar los archivos
+            close(20)
+            close(iunit)
+
+            ! Reemplazar el archivo original con el archivo temporal
+            call System("copy /Y " // trim(temp_file_path) // " " // trim(file_path))
+
+
+
+            ! Mostrar mensaje si el producto no se encontró
+            if (.not. encontrado) then
+                print *, "Producto no encontrado en el inventario."
+            else
+                print *, "Producto editado exitosamente."
+            end if
+
+            call system("PAUSE")
+            call System("CLS")
+        end if
+    end subroutine ActualizarInventario
 
 
     subroutine ManejarError(codigo)
