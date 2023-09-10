@@ -89,7 +89,6 @@ contains
             print *, ""
 
             write(20,'(A15, I5, F10.2)') trim(nombre), cantidad, precio
-            write(unit=iounit, fmt="(format string)", iostat=ios, advance='NO') variables  
         end do
 
         close(20)
