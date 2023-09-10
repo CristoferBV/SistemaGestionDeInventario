@@ -127,6 +127,7 @@ contains
         10  continue
 
         ! Pedir al usuario que elija un producto para eliminar
+        print *, ""
         print *, "Ingrese el nombre del producto que desea vender:"
         read *, producto_eliminar
 
