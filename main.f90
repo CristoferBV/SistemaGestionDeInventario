@@ -145,7 +145,6 @@ contains
             end if
         end do
 
-        ! Cerrar el archivo de inventario
         close(20)
 
         ! Si se encontró el producto, eliminarlo y actualizar el archivo
@@ -174,13 +173,108 @@ contains
 
     subroutine ConsultarPorNombre()
         character(25) :: nombre
-        ! Implementar la lógica para consultar por nombre
+        character(25) :: nombre_producto
+        integer :: cantidad_inventario
+        real :: precio_producto
+        logical :: encontrado
+        integer :: iostat
+        character(100) :: file_path
+        file_path = '../SistemaGestionDeInventario/Inventario/inventario.txt'
+
+        ! Abrir el archivo de inventario en modo lectura
+        open(20, file=file_path, status="old")
+
+        call System("CLS")
+        ! Pedir al usuario el nombre del producto a consultar
+        print *, "Ingrese el nombre del producto que desea consultar:"
+        read *, nombre
+        print *, ""
+
+        ! Inicializar la bandera "encontrado"
+        encontrado = .false.
+
+        ! Mostrar encabezado de la lista de inventario
+        print *, "    Inventario de Productos:"
+        print *, "---------------------------------"
+        print *, "Nombre     Cantidad    Precio"
+        print *, "---------------------------------"
+        print *, ""
+
+        ! Leer y buscar los productos del inventario
+        do
+            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+            if (iostat /= 0) exit ! Fin del archivo
+
+            ! Si se encuentra un producto con el nombre buscado, mostrarlo
+            if (trim(nombre_producto) == trim(nombre)) then
+                print *, trim(nombre_producto), cantidad_inventario, precio_producto
+                encontrado = .true.
+            end if
+        end do
+
+        ! Cerrar el archivo
+        close(20)
+
+        ! Mostrar mensaje si el producto no se encontró
+        if (.not. encontrado) then
+            print *, "Producto no encontrado en el inventario."
+        end if
+
+        print *, ""
+        call system("PAUSE")
+        call system("CLS")
     end subroutine ConsultarPorNombre
 
 
     subroutine ConsultarPorPrecio()
-        real :: precio
-        ! Implementar la lógica para consultar por precio
+        real :: precio, precio_producto
+        character(25) :: nombre_producto
+        integer :: cantidad_inventario
+        logical :: encontrado
+        integer :: iostat
+        character(100) :: file_path
+        file_path = '../SistemaGestionDeInventario/Inventario/inventario.txt'
+
+        ! Abrir el archivo de inventario en modo lectura
+        open(20, file=file_path, status="old")
+
+        call System("CLS")
+        ! Pedir al usuario el precio del producto a consultar
+        print *, "Ingrese el precio del producto que desea consultar:"
+        read *, precio
+        print *, ""
+
+        ! Inicializar la bandera "encontrado"
+        encontrado = .false.
+
+        ! Mostrar encabezado de la lista de inventario
+        print *, "    Inventario de Productos:"
+        print *, "---------------------------------"
+        print *, "Nombre     Cantidad    Precio"
+        print *, "---------------------------------"
+
+        ! Leer y buscar los productos del inventario
+        do
+            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+            if (iostat /= 0) exit ! Fin del archivo
+
+            ! Si se encuentra un producto con el precio buscado, mostrarlo
+            if (precio_producto == precio) then
+                print *, trim(nombre_producto), cantidad_inventario, precio_producto
+                encontrado = .true.
+            end if
+        end do
+
+        ! Cerrar el archivo
+        close(20)
+
+        ! Mostrar mensaje si el producto no se encontró
+        if (.not. encontrado) then
+            print *, "Producto no encontrado en el inventario."
+        end if
+
+        call system("PAUSE")
+        call system("CLS")
     end subroutine ConsultarPorPrecio
 
 
