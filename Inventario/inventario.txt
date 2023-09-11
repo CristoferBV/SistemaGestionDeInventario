@@ -1,5 +1,7 @@
-Fideos            35    777.00
-Pescado           98   3000.00
-Papas             55    890.00
-Carne             45   2800.00
-Cerdo             55   1600.00
+ Carne          23   3303.00000    
+ Pescado          98   3000.00000    
+ Papas          55   890.000000    
+ Carne          45   2800.00000    
+ Fresas           6   890.000000    
+ Papas          45   888.000000    
+        Lechuga   45    450.00

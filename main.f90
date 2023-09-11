@@ -3,9 +3,6 @@ program SistemaInventario
     implicit none                                       !módulo ISO_FORTRAN_ENV !Ambiente
 
     integer :: opcion
-    character(25) :: nombre
-    integer :: cantidad, cantidad_vendida
-    real :: precio
 
     do
         call MostrarMenu()
@@ -61,8 +58,15 @@ contains
 
         call System("CLS")
         print *, ""
-        print *, "Cuantos productos desea agregar?"
-        read(*, *) numProductos
+        do
+            print *, "Cuantos productos desea agregar?"
+            read(*, *, iostat=iostat) numProductos
+            if (iostat == 0) then
+                exit
+            else
+                print *, "Cantidad invalida. Intente de nuevo."
+            end if
+        end do
 
         ! Abrir el archivo en modo append (adición) si existe, de lo contrario, crearlo
         open(20, file=file_path, status="old", action="readwrite", position="append", iostat=iostat)
@@ -74,22 +78,42 @@ contains
         end if
 
         do i = 1, numProductos
-            call system("CLS")
             print *, ""
             print *, "---Registre el producto---  ", i
             print *, ""
 
-            print *, "Nombre: "
-            read(*, *) nombre
-            print *, ""
+            ! Validación del nombre
+            do
+                print *, "Nombre: "
+                read(*, *, iostat=iostat) nombre
+                if (iostat == 0) then
+                    exit
+                else
+                    print *, "Nombre invalido. Intente de nuevo."
+                end if
+            end do
 
-            print *, "Cantidad: "
-            read(*, *) cantidad
-            print *, ""
+            ! Validación de la cantidad (no acepta letras ni valores negativos)
+            do
+                print *, "Cantidad: "
+                read(*, *, iostat=iostat) cantidad
+                if (iostat == 0 .and. cantidad >= 0) then
+                    exit
+                else
+                    print *, "Cantidad invalida. Intente de nuevo."
+                end if
+            end do
 
-            print *, "Precio: "
-            read(*, *) precio
-            print *, ""
+            ! Validación del precio (no acepta letras ni valores negativos)
+            do
+                print *, "Precio: "
+                read(*, *, iostat=iostat) precio
+                if (iostat == 0 .and. precio >= 0.0) then
+                    exit
+                else
+                    print *, "Precio invalido. Intente de nuevo."
+                end if
+            end do
 
             write(20, '(A15, I5, F10.2)') trim(nombre), cantidad, precio
         end do
@@ -108,7 +132,6 @@ contains
         real :: precio_producto
         character(100) :: dato_a_buscar
 
-        ! Definir la ruta de archivo principal
         file_path = "C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\inventario.txt"
         temp_file_path = "C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\temp_inventario.txt"
 
@@ -129,11 +152,9 @@ contains
         print *, ""
         close(20)
 
-        ! Dato a buscar en el archivo y eliminar
         print *, "Escriba el producto que desea eliminar"
         read(*, *) dato_a_buscar
 
-        ! Inicializar la bandera "encontrado"
         encontrado = .false.
 
         ! Abrir el archivo temporal para mostrar el inventario actualizado
@@ -156,22 +177,20 @@ contains
         end do
         close(20)
 
-        ! Cerrar el archivo temporal para mostrar el inventario actualizado
         close(30)
 
         ! Reemplazar el archivo original con el archivo temporal si se encontró el dato
         if (encontrado) then
-            !call system('DEL "' // trim(temp_file_path) // '"')  ! Eliminar el archivo original
             call System("copy /Y " // trim(temp_file_path) // " " // trim(file_path))
-            call system('DEL "' // trim(temp_file_path) // '"')  ! Eliminar el archivo original
-            call system('REN "' // trim(temp_file_path) // '" "' // trim(file_path) // '"') ! Renombrar el archivo temporal como el original
+            call system('DEL "' // trim(temp_file_path) // '"')
+            call system('REN "' // trim(temp_file_path) // '" "' // trim(file_path) // '"')
 
         end if
 
         ! Mostrar los datos actualizados
         if (encontrado) then
             call system("CLS")
-            print *, "Producto eliminado con éxito!!"
+            print *, "Producto eliminado con exito!!"
             call system("PAUSE")
             call system("CLS")
         else
@@ -196,15 +215,12 @@ contains
         open(20, file=file_path, status="old")
 
         call System("CLS")
-        ! Pedir al usuario el nombre del producto a consultar
         print *, "Ingrese el nombre del producto que desea consultar:"
         read *, nombre
         print *, ""
 
-        ! Inicializar la bandera "encontrado"
         encontrado = .false.
 
-        ! Mostrar encabezado de la lista de inventario
         print *, "    Inventario de Productos:"
         print *, "---------------------------------"
         print *, "Nombre     Cantidad    Precio"
@@ -214,7 +230,7 @@ contains
         ! Leer y buscar los productos del inventario
         do
             read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
-            if (iostat /= 0) exit ! Fin del archivo
+            if (iostat /= 0) exit 
 
             ! Si se encuentra un producto con el nombre buscado, mostrarlo
             if (trim(nombre_producto) == trim(nombre)) then
@@ -223,10 +239,8 @@ contains
             end if
         end do
 
-        ! Cerrar el archivo
         close(20)
 
-        ! Mostrar mensaje si el producto no se encontró
         if (.not. encontrado) then
             print *, "Producto no encontrado en el inventario."
         end if
@@ -240,9 +254,9 @@ contains
     subroutine ConsultarPorPrecio()
         real :: precio, precio_producto
         character(25) :: nombre_producto
-        integer :: cantidad_inventario
+        integer :: cantidad_inventario, iostat
         logical :: encontrado
-        integer :: iostat
+        integer :: iostat_price
         character(100) :: file_path
         file_path = "C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\inventario.txt"
 
@@ -250,15 +264,19 @@ contains
         open(20, file=file_path, status="old")
 
         call System("CLS")
-        ! Pedir al usuario el precio del producto a consultar
-        print *, "Ingrese el precio del producto que desea consultar:"
-        read *, precio
-        print *, ""
 
-        ! Inicializar la bandera "encontrado"
+        do
+            print *, "Ingrese el precio del producto que desea consultar:"
+            read(*, *, iostat=iostat_price) precio
+            if (iostat_price == 0.and. precio >= 0.0) then
+                exit
+            else
+                print *, "Precio invalido. Intente de nuevo."
+            end if
+        end do
+
         encontrado = .false.
 
-        ! Mostrar encabezado de la lista de inventario
         print *, "    Inventario de Productos:"
         print *, "---------------------------------"
         print *, "Nombre     Cantidad    Precio"
@@ -267,7 +285,7 @@ contains
         ! Leer y buscar los productos del inventario
         do
             read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
-            if (iostat /= 0) exit ! Fin del archivo
+            if (iostat /= 0) exit
 
             ! Si se encuentra un producto con el precio buscado, mostrarlo
             if (precio_producto == precio) then
@@ -276,10 +294,8 @@ contains
             end if
         end do
 
-        ! Cerrar el archivo
         close(20)
 
-        ! Mostrar mensaje si el producto no se encontró
         if (.not. encontrado) then
             print *, "Producto no encontrado en el inventario."
         end if
@@ -344,19 +360,17 @@ contains
         integer :: cantidad_inventario, iostat
         real :: precio_producto
         logical :: encontrado
-        character(500) :: file_path
-        character(500) :: temp_file_path
+        character(100) :: file_path
+        character(100) :: temp_file_path
         integer :: iunit
         integer :: opcion
 
         file_path = "C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\inventario.txt"
-        temp_file_path = "C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\temp_inventario.txt"
+        temp_file_path = 'C:\\Users\\Cristofer\\Documentos\\SistemaDeGestionDeInventarios\\Inventario\\temp_inventario.txt'
 
-        ! Abrir el archivo de inventario en modo lectura
         open(20, file=file_path, status="old")
 
         call System("CLS")
-        ! Mostrar encabezado de la lista de inventario
         print *, "    Inventario de Productos:"
         print *, "---------------------------------"
         print *, "Nombre     Cantidad    Precio"
@@ -365,11 +379,10 @@ contains
         ! Leer y mostrar los productos del inventario
         do
             read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
-            if (iostat /= 0) exit ! Fin del archivo
+            if (iostat /= 0) exit
             print *, trim(nombre_producto), cantidad_inventario, precio_producto
         end do
 
-        ! Cerrar el archivo
         close(20)
 
         print *, ""
@@ -377,18 +390,23 @@ contains
         print *, "1. Editar producto"
         print *, "2. Volver al menu principal"
         read(*, *) opcion
+        call System("CLS")
 
         if (opcion == 1) then
             call System("CLS")
-            ! Pedir al usuario el nombre del producto a editar
-            print *, "Ingrese el nombre del producto que desea editar:"
-            read(*, *) nombre
+            do
+                print *, "Ingrese el nombre del producto que desea editar:"
+                read(*, *, iostat=iostat) nombre
+                if (iostat == 0) then
+                    exit
+                else
+                    print *, "Nombre invalido. Intente de nuevo."
+                end if
+            end do
             print *, ""
 
-            ! Inicializar la bandera "encontrado"
             encontrado = .false.
 
-            ! Abrir el archivo de inventario en modo lectura y escritura
             open(20, file=file_path, status="old", action="readwrite")
 
             ! Abrir un archivo temporal para escribir los datos editados
@@ -396,33 +414,57 @@ contains
 
             ! Leer y editar los productos del inventario
             do
-            read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
-            if (iostat /= 0) exit ! Fin del archivo
+                read(20, *, iostat=iostat) nombre_producto, cantidad_inventario, precio_producto
+                if (iostat /= 0) exit 
 
-            ! Si se encuentra un producto con el nombre buscado, editar y escribir en el archivo temporal
-            if (trim(nombre_producto) == trim(nombre)) then
-                print *, "Editando producto:", nombre_producto
-                print *, "Ingrese el nuevo nombre:"
-                read(*, *) nombre_producto
-                print *, "Ingrese la nueva cantidad:"
-                read(*, *) cantidad_inventario
-                print *, "Ingrese el nuevo precio:"
-                read(*, *) precio_producto
-                encontrado = .true.
-            end if
+                if (trim(nombre_producto) == trim(nombre)) then
+                    print *, "Editando producto:", nombre_producto
 
-            ! Escribir en el archivo temporal
-            write(iunit, *) trim(nombre_producto), cantidad_inventario, precio_producto
+                    do
+                        print *, "Ingrese el nuevo nombre:"
+                        read(*, *, iostat=iostat) nombre_producto
+                        if (iostat == 0) then
+                            exit
+                        else
+                            print *, "Nombre invalido. Intente de nuevo."
+                        end if
+                    end do
+
+                    ! Validación de la cantidad (no acepta letras ni valores negativos)
+                    do
+                        print *, "Ingrese la nueva cantidad:"
+                        read(*, *, iostat=iostat) cantidad_inventario
+                        if (iostat == 0 .and. cantidad_inventario >= 0) then
+                            exit
+                        else
+                            print *, "Cantidad invalida. Intente de nuevo."
+                        end if
+                    end do
+
+                    ! Validación del precio (no acepta letras ni valores negativos)
+                    do
+                        print *, "Ingrese el nuevo precio:"
+                        read(*, *, iostat=iostat) precio_producto
+                        if (iostat == 0 .and. precio_producto >= 0.0) then
+                            exit
+                        else
+                            print *, "Precio invalido. Intente de nuevo."
+                        end if
+                    end do
+
+                    encontrado = .true.
+                end if
+
+                ! Escribir en el archivo temporal
+                write(iunit, *) trim(nombre_producto), cantidad_inventario, precio_producto
             end do
 
-            ! Cerrar los archivos
             close(20)
             close(iunit)
 
             ! Reemplazar el archivo original con el archivo temporal
             call System("copy /Y " // trim(temp_file_path) // " " // trim(file_path))
 
-            ! Mostrar mensaje si el producto no se encontró
             if (.not. encontrado) then
                 print *, "Producto no encontrado en el inventario."
             else
@@ -448,6 +490,5 @@ contains
         end select
     end subroutine ManejarError
 
-    
 
 end program SistemaInventario
